@@ -1,0 +1,18 @@
+body {
+    font-family: Arial;
+    margin: 40px;
+}
+
+h1 {
+    color: green;
+}
+
+table {
+    border-collapse: collapse;
+    width: 60%;
+}
+
+td, th {
+    border: 1px solid #ccc;
+    padding: 8px;
+}

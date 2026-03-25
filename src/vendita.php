@@ -1,43 +1,33 @@
 <?php include "db.php"; ?>
 
-<h2>Nuova Vendita</h2>
-
 <form method="POST">
-    ID Cliente: <input type="number" name="cliente"><br>
-    ID Prodotto: <input type="number" name="prodotto"><br>
-    Quantità: <input type="number" step="0.01" name="quantita"><br>
-
-    <button type="submit" name="vendi">Vendi</button>
+Cliente: <input name="cliente"><br>
+Prodotto: <input name="prodotto"><br>
+Quantità: <input name="quantita"><br>
+<button name="vendi">Vendi</button>
 </form>
 
 <?php
-if (isset($_POST['vendi'])) {
+if(isset($_POST['vendi'])){
+$idP=$_POST['prodotto'];
+$q=$_POST['quantita'];
+$idC=$_POST['cliente'];
 
-    $idProdotto = $_POST['prodotto'];
-    $quantita = $_POST['quantita'];
-    $idCliente = $_POST['cliente'];
+$r=$conn->query("SELECT prezzoUnitario FROM Prezzo WHERE idProdotto=$idP ORDER BY dataInizioValidita DESC LIMIT 1");
+$p=$r->fetch_assoc()['prezzoUnitario'];
 
-    // prezzo attuale
-    $res = $conn->query("SELECT prezzo FROM prezzo WHERE idProdotto = $idProdotto ORDER BY dataInizio DESC LIMIT 1");
-    $prezzo = $res->fetch_assoc()['prezzo'];
+$tot=$p*$q;
 
-    $totale = $prezzo * $quantita;
+$conn->query("INSERT INTO Acquisto(idCliente,dataAcquisto,totaleCalcolato,totalePagato)
+VALUES($idC,NOW(),$tot,$tot)");
 
-    // inserisci acquisto
-    $conn->query("INSERT INTO acquisto (idCliente, dataAcquisto, totaleCalcolato, totalePagato)
-                  VALUES ($idCliente, NOW(), $totale, $totale)");
+$idA=$conn->insert_id;
 
-    $idAcquisto = $conn->insert_id;
+$conn->query("INSERT INTO Dettaglio_Acquisto(idAcquisto,idProdotto,quantita,prezzoApplicato)
+VALUES($idA,$idP,$q,$p)");
 
-    // dettaglio
-    $conn->query("INSERT INTO dettaglio_acquisto (idAcquisto, idProdotto, quantita, prezzoUnitario)
-                  VALUES ($idAcquisto, $idProdotto, $quantita, $prezzo)");
+$conn->query("UPDATE Prodotto SET giacenza=giacenza-$q WHERE idProdotto=$idP");
 
-    // aggiorna giacenza
-    $conn->query("UPDATE prodotto
-                  SET giacenza = giacenza - $quantita
-                  WHERE idProdotto = $idProdotto");
-
-    echo "Vendita effettuata!";
+echo "OK";
 }
 ?>

@@ -1,73 +1,58 @@
-CREATE DATABASE IF NOT EXISTS azienda_agricola;
-USE azienda_agricola;
-
--- CLIENTE
-CREATE TABLE cliente (
-    idCliente INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100),
-    nickname VARCHAR(100),
-    contatto VARCHAR(150)
-);
-
--- CATEGORIA
-CREATE TABLE categoria (
+CREATE TABLE Categoria (
     idCategoria INT AUTO_INCREMENT PRIMARY KEY,
-    nomeCategoria VARCHAR(100) UNIQUE
+    nome VARCHAR(50) UNIQUE
 );
 
--- PRODOTTO
-CREATE TABLE prodotto (
+CREATE TABLE Prodotto (
     idProdotto INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100),
-    tipo ENUM('fresco', 'riserva', 'confezionato'),
-    unitaMisura ENUM('kg', 'pezzo', 'litro'),
-    giacenza DECIMAL(10,2),
+    nome VARCHAR(50),
+    tipo VARCHAR(20),
+    unitaMisura VARCHAR(10),
     idCategoria INT,
-    FOREIGN KEY (idCategoria) REFERENCES categoria(idCategoria)
+    FOREIGN KEY (idCategoria) REFERENCES Categoria(idCategoria)
 );
 
--- PREZZO (storico)
-CREATE TABLE prezzo (
+CREATE TABLE Prezzo (
     idPrezzo INT AUTO_INCREMENT PRIMARY KEY,
+    prezzoUnitario DECIMAL(10,2),
+    dataInizioValidita DATE,
     idProdotto INT,
-    prezzo DECIMAL(10,2),
-    dataInizio DATE,
-    FOREIGN KEY (idProdotto) REFERENCES prodotto(idProdotto)
+    FOREIGN KEY (idProdotto) REFERENCES Prodotto(idProdotto)
 );
 
--- ACQUISTO
-CREATE TABLE acquisto (
+CREATE TABLE Cliente (
+    idCliente INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50),
+    nickname VARCHAR(50),
+    telefono VARCHAR(20),
+    email VARCHAR(50)
+);
+
+CREATE TABLE Luogo (
+    idLuogo INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50),
+    indirizzo VARCHAR(100)
+);
+
+CREATE TABLE Acquisto (
     idAcquisto INT AUTO_INCREMENT PRIMARY KEY,
-    idCliente INT,
     dataAcquisto DATE,
     totaleCalcolato DECIMAL(10,2),
     totalePagato DECIMAL(10,2),
     note TEXT,
-    FOREIGN KEY (idCliente) REFERENCES cliente(idCliente)
+    idCliente INT,
+    idLuogo INT,
+    FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente),
+    FOREIGN KEY (idLuogo) REFERENCES Luogo(idLuogo)
 );
 
--- DETTAGLIO ACQUISTO
-CREATE TABLE dettaglio_acquisto (
-    idDettaglio INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE Dettaglio_Acquisto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     idAcquisto INT,
     idProdotto INT,
     quantita DECIMAL(10,2),
-    prezzoUnitario DECIMAL(10,2),
-    FOREIGN KEY (idAcquisto) REFERENCES acquisto(idAcquisto),
-    FOREIGN KEY (idProdotto) REFERENCES prodotto(idProdotto)
+    prezzoApplicato DECIMAL(10,2),
+    omaggio BOOLEAN,
+    FOREIGN KEY (idAcquisto) REFERENCES Acquisto(idAcquisto),
+    FOREIGN KEY (idProdotto) REFERENCES Prodotto(idProdotto)
 );
-
--- TRIGGER BLOCCA GIACENZA NEGATIVA
-DELIMITER $$
-
-CREATE TRIGGER check_giacenza
-BEFORE UPDATE ON prodotto
-FOR EACH ROW
-BEGIN
-    IF NEW.giacenza < 0 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Giacenza negativa non consentita';
-    END IF;
-END$$
-
-DELIMITER ;

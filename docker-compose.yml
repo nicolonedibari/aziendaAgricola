@@ -5,12 +5,7 @@ services:
     build: .
     container_name: AziendaAgricola
     ports:
-      - "9084:80"
-    environment:
-      DB_NAME: aziendaAgricola
-      DB_USER: agricoltore
-      DB_PASS: nicolone
-      DB_HOST: db
+      - "8080:80"
     volumes:
       - ./src:/var/www/html
     depends_on:
@@ -24,8 +19,8 @@ services:
     container_name: AziendaAgricola-DB
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root123456
-      MYSQL_DATABASE: aziendaAgricola
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: azienda
       MYSQL_USER: agricoltore
       MYSQL_PASSWORD: nicolone
     volumes:
@@ -44,7 +39,7 @@ services:
     container_name: AziendaAgricola-PMA
     restart: always
     ports:
-      - "9085:80"
+      - "8081:80"
     environment:
       PMA_HOST: db
       PMA_USER: agricoltore

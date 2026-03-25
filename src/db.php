@@ -1,5 +1,10 @@
 <?php
-$conn = new mysqli("db", "myuser", "mypassword", "azienda_agricola");
+$host = "db";
+$user = "agricoltore";
+$password = "nicolone";
+$database = "azienda";
+
+$conn = new mysqli($host, $user, $password, $database);
 
 if ($conn->connect_error) {
     die("Errore connessione: " . $conn->connect_error);
